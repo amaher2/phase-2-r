@@ -1,0 +1,421 @@
+library(dataRetrieval)
+#this is all of the site IDs from phase 1 and phase 2
+sites<-c("450814094315001",
+"450814094315002",
+"450814094315003",
+"450814094315004",
+"450814094315006",
+"450832094321201",
+"450832094321202",
+"450832094321203",
+"450832094321204",
+"450832094321205",
+"450832094321206",
+"450821094320601",
+"450837094321601",
+"450820094320801",
+"450828094320601",
+"450851094321201",
+"464110092531401",
+"464110092531402",
+"464110092531403",
+"464112092531401",
+"464112092531402",
+"464112092531403",
+"464112092531404",
+"464112092531405",
+"464109092530701",
+"464111092531401",
+"465652094394801",
+"465652094394802",
+"465652094394803",
+"465652094394804",
+"465653094394701",
+"465651094394001",
+"465652094394701",
+"465652094394501",
+"465711094392601",
+"465712094404201",
+"465725094403207",
+"444630095002202",
+"444630095002203",
+"444630095002204",
+"444630095002205",
+"444630095002206",
+"444630095002207",
+"444630095002208",
+"444630095002209",
+"444630095002201",
+"444630095002201",
+"444639095002201",
+"444639095002201",
+"444639095002201",
+"444637095013701")
+qw<-readNWISqw(siteNumber=sites, parameterCd="All",expanded=TRUE,startDate="",endDate="",tz="America/Chicago")
+pcode<-readNWISpCode(parameterCd="all")
+names(pcode)
+head(pcode)
+#subset to just the pcodes in our data set
+pcode.sub<-pcode[(which(pcode$parameter_cd %in% unique(qw$parm_cd))),]
+#add "x" to parameter_cd column so leading 0's don't get deleted in excel csv file.
+pcode.sub$parameter_cd<-paste("x",pcode.sub$parameter_cd,sep="")
+write.csv(pcode.sub,file="FPJ_pcodes.csv")
+pcode.sub.edit<-read.csv(file="FPJ_pcodes.csv",header=TRUE,sep=",")
+#remove the x
+pcode.sub.edit$parameter_cd<-gsub(pattern = "x",replacement = "",x=pcode.sub.edit$parameter_cd)
+#and merge it with your qw file so that user friendly names can become columns names when you make your data set wide.
+qw<-merge(x=qw, y=pcode.sub.edit,by.x = "parm_cd",by.y="parameter_cd",all.x = TRUE)
+#then decide which columns you want to keep for the final data set for making graphs and figures.
+#when you have the columns in the qw file named the same as your gdat chemistry file, then you can merge the two data sets
+#with rbind
+dat.all<-rbind(qw,gdat.c)
+library(dplyr)
+pcode.sub.edit<-read.csv(file="FPJ_pcodes.csv",header=TRUE,sep=",")
+#remove the x
+pcode.sub.edit$parameter_cd<-gsub(pattern = "x",replacement = "",x=pcode.sub.edit$parameter_cd)
+#and merge it with your qw file so that user friendly names can become columns names when you make your data set wide.
+qw<-merge(x=qw, y=pcode.sub.edit,by.x = "parm_cd",by.y="parameter_cd",all.x = TRUE)
+#then decide which columns you want to keep for the final data set for making graphs and figures.
+#when you have the columns in the qw file named the same as your gdat chemistry file, then you can merge the two data sets
+#with rbind
+dat.all<-rbind(qw,gdat.c)
+library(dataRetrieval)
+#this is all of the site IDs from phase 1 and phase 2
+sites<-c("450814094315001",
+"450814094315002",
+"450814094315003",
+"450814094315004",
+"450814094315006",
+"450832094321201",
+"450832094321202",
+"450832094321203",
+"450832094321204",
+"450832094321205",
+"450832094321206",
+"450821094320601",
+"450837094321601",
+"450820094320801",
+"450828094320601",
+"450851094321201",
+"464110092531401",
+"464110092531402",
+"464110092531403",
+"464112092531401",
+"464112092531402",
+"464112092531403",
+"464112092531404",
+"464112092531405",
+"464109092530701",
+"464111092531401",
+"465652094394801",
+"465652094394802",
+"465652094394803",
+"465652094394804",
+"465653094394701",
+"465651094394001",
+"465652094394701",
+"465652094394501",
+"465711094392601",
+"465712094404201",
+"465725094403207",
+"444630095002202",
+"444630095002203",
+"444630095002204",
+"444630095002205",
+"444630095002206",
+"444630095002207",
+"444630095002208",
+"444630095002209",
+"444630095002201",
+"444630095002201",
+"444639095002201",
+"444639095002201",
+"444639095002201",
+"444637095013701")
+qw<-readNWISqw(siteNumber=sites, parameterCd="All",expanded=TRUE,startDate="",endDate="",tz="America/Chicago")
+#qw has all of the data in it in a long format.  This is what you will use to append to the dataset we just built with
+#data from the other labs.
+#view all USGS parameter codes
+pcode<-readNWISpCode(parameterCd="all")
+names(pcode)
+head(pcode)
+#subset to just the pcodes in our data set
+pcode.sub<-pcode[(which(pcode$parameter_cd %in% unique(qw$parm_cd))),]
+#add "x" to parameter_cd column so leading 0's don't get deleted in excel csv file.
+pcode.sub$parameter_cd<-paste("x",pcode.sub$parameter_cd,sep="")
+#then I suggest exporting this pcode.sub file
+write.csv(pcode.sub,file="FPJ_pcodes.csv")
+#open in excel and add a column of names (named "analyte" perhaps) that are more datbase/R friendly (for example: NO3NO2_mgl)
+#make sure the name matches other names that you already assigned in other data sets.
+#You may want to review the srsname column, maybe some of these will work for you.
+#you will then have to reimport your edited version
+pcode.sub.edit<-read.csv(file="FPJ_pcodes.csv",header=TRUE,sep=",")
+#remove the x
+pcode.sub.edit$parameter_cd<-gsub(pattern = "x",replacement = "",x=pcode.sub.edit$parameter_cd)
+#and merge it with your qw file so that user friendly names can become columns names when you make your data set wide.
+qw<-merge(x=qw, y=pcode.sub.edit,by.x = "parm_cd",by.y="parameter_cd",all.x = TRUE)
+#then decide which columns you want to keep for the final data set for making graphs and figures.
+#when you have the columns in the qw file named the same as your gdat chemistry file, then you can merge the two data sets
+#with rbind
+dat.all<-rbind(qw,gdat.c)
+#then check for factor columns, if so, change to character.
+#then work on a site file with well depths, elevations, etc. make into a nice R format, import it, and merge it with
+#all of the geochemistry data.  The site info has many of the plotting coordinates you'll need (like depth, elevation,
+#etc.).  You will be merging with some unique site ID.  all of the geochem data has the USGS site id.
+library(dplyr)
+names(qw)[names(qw) == "medium_cd"] <- "Medium_Code"
+names(qw)[names(qw) == "sample_dt"] <- "Date_Analyzed"
+names(qw)[names(qw) == "srsname"] <- "Analyte"
+names(qw)[names(qw) == "parameter_units"] <- "units"
+names(qw)[names(qw) == "result_va"] <- "value"
+names(qw)[names(qw) == "remark_cd"] <- "value.prefix"
+names(qw)[names(qw) == "parameter_nm"] <- "variable"
+sapply(qw,class)
+qw$site_no<-as.numeric(qw$site_no)
+#export csv
+write.csv(qw, "qwexport.csv")
+library(dataRetrieval)
+#this is all of the site IDs from phase 1 and phase 2
+sites<-c("450814094315001",
+"450814094315002",
+"450814094315003",
+"450814094315004",
+"450814094315006",
+"450832094321201",
+"450832094321202",
+"450832094321203",
+"450832094321204",
+"450832094321205",
+"450832094321206",
+"450821094320601",
+"450837094321601",
+"450820094320801",
+"450828094320601",
+"450851094321201",
+"464110092531401",
+"464110092531402",
+"464110092531403",
+"464112092531401",
+"464112092531402",
+"464112092531403",
+"464112092531404",
+"464112092531405",
+"464109092530701",
+"464111092531401",
+"465652094394801",
+"465652094394802",
+"465652094394803",
+"465652094394804",
+"465653094394701",
+"465651094394001",
+"465652094394701",
+"465652094394501",
+"465711094392601",
+"465712094404201",
+"465725094403207",
+"444630095002202",
+"444630095002203",
+"444630095002204",
+"444630095002205",
+"444630095002206",
+"444630095002207",
+"444630095002208",
+"444630095002209",
+"444630095002201",
+"444630095002201",
+"444639095002201",
+"444639095002201",
+"444639095002201",
+"444637095013701")
+qw<-readNWISqw(siteNumber=sites, parameterCd="All",expanded=TRUE,startDate="",endDate="",tz="America/Chicago")
+View(qw)
+#view all USGS parameter codes
+pcode<-readNWISpCode(parameterCd="all")
+names(pcode)
+head(pcode)
+#subset to just the pcodes in our data set
+pcode.sub<-pcode[(which(pcode$parameter_cd %in% unique(qw$parm_cd))),]
+#add "x" to parameter_cd column so leading 0's don't get deleted in excel csv file.
+pcode.sub$parameter_cd<-paste("x",pcode.sub$parameter_cd,sep="")
+#then I suggest exporting this pcode.sub file
+write.csv(pcode.sub,file="FPJ_pcodes.csv")
+#you will then have to reimport your edited version
+pcode.sub.edit<-read.csv(file="P:/FPJ00/analysis/Combined_geochem/Geochem_DataSet_2/FPJ_pcodes.csv",header=TRUE,sep=",")
+#remove the x
+pcode.sub.edit$parameter_cd<-gsub(pattern = "x",replacement = "",x=pcode.sub.edit$parameter_cd)
+#and merge it with your qw file so that user friendly names can become columns names when you make your data set wide.
+qw<-merge(x=qw, y=pcode.sub.edit,by.x = "parm_cd",by.y="parameter_cd",all.x = TRUE)
+View(qw)
+View(qw)
+qw$casrn <- NULL
+qw$parameter_group_nm <- NULL
+qw$X <- NULL
+qw$sample_start_time_datum_cd <- NULL
+qw$startDateTime <- NULL
+qw$result_lab_cm_tx <- NULL
+qw$anl_dt <- NULL
+qw$anl_set_no <- NULL
+qw$prep_dt <- NULL
+qw$prep_set_no <- NULL
+qw$rpt_lev_cd <- NULL
+qw$dqi_cd <- NULL
+qw$val_qual_tx <- NULL
+qw$sample_lab_cm_tx <- NULL
+qw$hyd_event_cd <- NULL
+qw$samp_type_cd <- NULL
+qw$hyd_cond_cd <- NULL
+qw$body_part_id <- NULL
+qw$tu_id <- NULL
+qw$aqfr_cd <- NULL
+qw$project_cd <- NULL
+qw$tm_datum_rlbty_cd <- NULL
+qw$sample_start_time_datum_cd_reported <- NULL
+qw$sample_end_tm <- NULL
+qw$sample_end_dt <- NULL
+qw$sample_tm <- NULL
+View(qw)
+qw$lab_std_va <- NULL
+View(qw)
+qw$parm_cd <- NULL
+qw$agency_cd <- NULL
+write.csv(qw, "qwexport.csv")
+library(dplyr)
+siteInfo <- read.csv('P:/FPJ00/analysis/Combined_geochem/inputDatasets/Phase1_2_wellinfo.csv')
+siteInfo<-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/Phase1_2_wellinfo.csv",stringsAsFactors = FALSE)
+str(siteInfo)
+names(gdat.m)
+names(siteInfo)
+USGSwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/qwexport.csv")
+Otherlabwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/gdatmcsvexport.csv")
+#then do rbind to put datasets together.
+g.all.bind <- rbind(USGSwaterquality, Otherlabwaterquality)
+View(g.all.bind)
+siteInfo<-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/Phase1_2_wellinfo.csv",stringsAsFactors = FALSE)
+str(siteInfo)
+names(gdat.m)
+names(siteInfo)
+USGSwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/qwexport.csv")
+Otherlabwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/gdatmcsvexport.csv")
+g.all.bind <- rbind(USGSwaterquality, Otherlabwaterquality)
+View(g.all.bind)
+siteInfo <- read.csv('P:/FPJ00/analysis/Combined_geochem/inputDatasets/Phase1_2_wellinfo.csv')
+siteInfo<-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/Phase1_2_wellinfo.csv",stringsAsFactors = FALSE)
+str(siteInfo)
+names(gdat.m)
+names(siteInfo)
+USGSwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/qwexport.csv")
+Otherlabwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/gdatmcsvexport.csv")
+g.all.bind <- rbind(USGSwaterquality, Otherlabwaterquality)
+View(g.all.bind)
+#Need to get rid of factors
+sapply(g.all, class)
+#Need to get rid of factors
+sapply(g.all.bind, class)
+names(g.all.bind)
+g.all.bind %>% mutate_if(is.factor, as.character) -> g.all.bind
+#dplyr package way to replace all factors
+library(dplyr)
+g.all.bind %>% mutate_if(is.factor, as.character) -> g.all.bind
+g.all.bind %>% mutate_if(is.factor, as.character) -> g.all.bind
+#Need to get rid of factors
+sapply(g.all.bind, class)
+g.all2 <- merge(g.all.bind,Phase1_2_wellinfo,by=c("Site_ID", "medium_cd"), all = TRUE, sort = FALSE)
+#Merge troubleshooting. Works the best for WW! No repeats and no erasing of dates.
+g.all2 <- merge(g.all.bind,siteInfo,by=c("Site_ID", "medium_cd"), all = TRUE, sort = FALSE)
+View(g.all2)
+#download a csv file
+write.csv(g.all2, "QwExport2.csv")
+#Get rid of extra Site_ID column
+g.all2$site_no.y <- NULL
+siteInfo <- read.csv('P:/FPJ00/analysis/Combined_geochem/inputDatasets/Phase1_2_wellinfo.csv')
+siteInfo<-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/Phase1_2_wellinfo.csv",stringsAsFactors = FALSE)
+str(siteInfo)
+siteInfo<-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/Phase1_2_wellinfo.csv",stringsAsFactors = FALSE)
+str(siteInfo)
+USGSwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/qwexport.csv")
+Otherlabwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/gdatmcsvexport.csv")
+g.all.bind <- rbind(USGSwaterquality, Otherlabwaterquality)
+sapply(g.all.bind, class)
+names(g.all.bind)
+g.all.bind %>% mutate_if(is.factor, as.character) -> g.all.bind
+#Need to get rid of factors
+sapply(g.all.bind, class)
+g.all2 <- merge(g.all.bind,siteInfo,by=c("Site_ID", "medium_cd"), all = TRUE, sort = FALSE)
+#Get rid of extra Site_ID column
+g.all2$site_no.y <- NULL
+View(g.all2)
+names(g.all2)[names(g.all2) == "site_no.x"] <- "site_no"
+write.csv(g.all2, "QwExport2.csv")
+library(dplyr)
+USGSwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/qwexport.csv")
+Otherlabwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/gdatmcsvexport.csv")
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l NH4",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l asNO3",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="code",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="tons/ac ft",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_nm!="Specific conductance_ water_ unfiltered_ laboratory_ microsiemens per centimeter at 25 degrees Celsius",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_nm!="Dissolved solids_ water_ filtered_ sum of constituents_ milligrams per liter",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_nm!="Dissolved oxygen_ water_ unfiltered_ percent of saturation",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l NH4",]
+View(USGSwaterquality2)
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l asNO3",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="code",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="tons/ac ft",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_nm!="Specific conductance_ water_ unfiltered_ laboratory_ microsiemens per centimeter at 25 degrees Celsius",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_nm!="Dissolved solids_ water_ filtered_ sum of constituents_ milligrams per liter",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_nm!="Dissolved oxygen_ water_ unfiltered_ percent of saturation",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l NH4",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l asNO3",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="code",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="tons/ac ft",]
+View(USGSwaterquality2)
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l NH4",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l asNO3",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="code",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="tons/ac ft",]
+Otherlabwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/gdatmcsvexport.csv")
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l NH4",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l asNO3",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="code",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_units!="tons/ac ft",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_nm!="Specific conductance_ water_ unfiltered_ laboratory_ microsiemens per centimeter at 25 degrees Celsius",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_nm!="Dissolved solids_ water_ filtered_ sum of constituents_ milligrams per liter",]
+USGSwaterquality2<-USGSwaterquality[USGSwaterquality$parameter_nm!="Dissolved oxygen_ water_ unfiltered_ percent of saturation",]
+#USGSwaterquality$meth_cd[USGSwaterquality$meth_cd=="ALGOR"]<-"USGSNWQL"
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l NH4",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l asNO3",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_units!="code",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_units!="tons/ac ft",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_nm!="Specific conductance_ water_ unfiltered_ laboratory_ microsiemens per centimeter at 25 degrees Celsius",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_nm!="Dissolved solids_ water_ filtered_ sum of constituents_ milligrams per liter",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_nm!="Dissolved oxygen_ water_ unfiltered_ percent of saturation",]
+write.csv(USGSwaterquality, "CleanedUSGSWQ.csv")
+CleanedUSGSWQ <- read.csv('P:/FPJ00/analysis/Combined_geochem/Geochem_DataSet_2/CleanedUSGSWQ.csv')
+g.all.3 <- rbind(CleanedUSGSWQ, Otherlabwaterquality)
+library(dplyr)
+USGSwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/qwexport.csv")
+Otherlabwaterquality <-read.csv("P:/FPJ00/analysis/Combined_geochem/inputDatasets/gdatmcsvexport.csv")
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l NH4",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_units!="mg/l asNO3",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_units!="code",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_units!="tons/ac ft",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_nm!="Specific conductance_ water_ unfiltered_ laboratory_ microsiemens per centimeter at 25 degrees Celsius",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_nm!="Dissolved solids_ water_ filtered_ sum of constituents_ milligrams per liter",]
+USGSwaterquality<-USGSwaterquality[USGSwaterquality$parameter_nm!="Dissolved oxygen_ water_ unfiltered_ percent of saturation",]
+#USGSwaterquality$meth_cd[USGSwaterquality$meth_cd=="ALGOR"]<-"USGSNWQL"
+write.csv(USGSwaterquality, "CleanedUSGSWQ.csv")
+CleanedUSGSWQ <- read.csv('P:/FPJ00/analysis/Combined_geochem/Geochem_DataSet_2/CleanedUSGSWQ.csv')
+g.all.3 <- rbind(CleanedUSGSWQ, Otherlabwaterquality)
+View(CleanedUSGSWQ)
+CleanedUSGSWQ$X <- NULL
+g.all.3 <- rbind(CleanedUSGSWQ, Otherlabwaterquality)
+g.all.3 <- merge(g.all.3,siteInfo,by=c("Site_ID", "medium_cd"), all = TRUE, sort = FALSE)
+write.csv(g.all3, "QwExport3.csv")
+write.csv(g.all.3, "QwExport3.csv")
+g.all3$site_no.y <- NULL
+#Get rid of extra Site_ID column
+g.all.3$site_no.y <- NULL
+#Rename the site_no.x column
+names(g.all.3)[names(g.all.3) == "site_no.x"] <- "site_no"
+#download a csv file
+write.csv(g.all.3, "QwExport3.csv")
